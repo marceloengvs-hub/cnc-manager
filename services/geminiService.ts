@@ -17,28 +17,25 @@ const getMockData = (reason: string): AiPresetResponse => ({
   plungeRate: 800,
   stepDown: 1.5,
   explanation: `Modo Demo: ${reason}`,
-  warning: "Configure a API_KEY no Vercel para usar IA real."
+  warning: "Configure a API_KEY no Vercel ou aguarde a cota resetar."
 });
 
 export const generateParametersWithAI = async (
   bit: MillingBit, 
   material: string
 ): Promise<AiPresetResponse> => {
-  // A chave deve vir obrigatoriamente do environment configurado no build/Vercel
   const apiKey = process.env.API_KEY;
   
   if (!apiKey || apiKey === 'undefined' || apiKey === '') {
-    console.error("ERRO: API_KEY não encontrada nas variáveis de ambiente do Vercel.");
-    return getMockData("Chave de API não configurada no servidor");
+    console.error("ERRO: API_KEY não encontrada.");
+    return getMockData("Chave de API não configurada");
   }
   
   try {
-    // Inicialização seguindo as diretrizes Senior: nomeado, nova instância por chamada
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     
-    // Usando Gemini 3 Pro para tarefas complexas de lógica e STEM (parâmetros de usinagem)
-    // NOTA: O modelo 'gemini-3-pro-preview' requer obrigatoriamente um thinkingBudget > 0.
-    const modelId = 'gemini-3-pro-preview';
+    // Mudando para Flash: muito mais rápido e com cota maior que o Pro
+    const modelId = 'gemini-3-flash-preview';
 
     const prompt = `
       Atue como um especialista sênior em usinagem CNC.
@@ -75,8 +72,8 @@ export const generateParametersWithAI = async (
       config: {
         responseMimeType: "application/json",
         responseSchema: responseSchema,
-        temperature: 1, // Geralmente utiliza-se temperature 1 com modelos de 'thinking' para melhor exploração de caminhos lógicos
-        thinkingConfig: { thinkingBudget: 4096 } // Definindo um orçamento positivo para evitar erro INVALID_ARGUMENT
+        temperature: 0.2, // Temperatura baixa para maior precisão técnica
+        thinkingConfig: { thinkingBudget: 0 } // Desabilitado para resposta instantânea
       }
     });
 
@@ -84,17 +81,16 @@ export const generateParametersWithAI = async (
       return JSON.parse(response.text.trim()) as AiPresetResponse;
     }
     
-    throw new Error("Resposta da IA retornou sem conteúdo de texto.");
+    throw new Error("Resposta da IA vazia.");
 
   } catch (error: any) {
     console.error("Falha na chamada da API Gemini:", error);
     
-    // Tratamento específico para erro de entidade não encontrada (comum em chaves novas ou projetos mal vinculados)
-    if (error?.message?.includes("Requested entity was not found")) {
-        return getMockData("Erro de permissão na API (Verifique o projeto no Google Cloud)");
+    // Mensagem amigável para erro de cota
+    if (error?.message?.includes("429") || error?.message?.includes("RESOURCE_EXHAUSTED")) {
+        return getMockData("Cota da API excedida. Tente novamente em alguns minutos ou use uma chave paga.");
     }
 
-    // Retorna mensagem de erro detalhada para facilitar o debug pelo usuário
-    return getMockData(`Erro técnico: ${error?.message || 'Falha na conexão'}`);
+    return getMockData(error?.message || "Erro na conexão com a IA");
   }
 };
