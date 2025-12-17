@@ -1,4 +1,3 @@
-
 import { supabase } from './supabaseClient';
 import { MillingBit, Collet, HistoryLog } from '../types';
 import { mockBits, mockCollets } from './mockData';
@@ -192,15 +191,10 @@ export const createCollet = async (collet: Omit<Collet, 'id'>) => {
 // --- History API (Mock) ---
 
 export const fetchHistory = async (): Promise<HistoryLog[]> => {
-  // Simulate delay
-  await new Promise(r => setTimeout(r, 600));
-
+  // No artificial delay for snappier UI
   const now = new Date();
   const yesterday = new Date(now); yesterday.setDate(now.getDate() - 1);
   const lastWeek = new Date(now); lastWeek.setDate(now.getDate() - 3);
-
-  // Helper to get random item
-  const getRandomBit = () => mockBits[Math.floor(Math.random() * Math.min(5, mockBits.length))];
 
   const logs: HistoryLog[] = [
     {

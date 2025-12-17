@@ -10,85 +10,91 @@ export interface AiPresetResponse {
   warning?: string;
 }
 
-// Helper para dados simulados
+// Helper para dados simulados em caso de falha ou falta de chave
 const getMockData = (reason: string): AiPresetResponse => ({
   rpm: 18000,
   feedRate: 2500,
   plungeRate: 800,
   stepDown: 1.5,
   explanation: `Modo Demo: ${reason}`,
-  warning: "Dados simulados (IA indisponível)"
+  warning: "Configure a API_KEY no Vercel para usar IA real."
 });
 
 export const generateParametersWithAI = async (
   bit: MillingBit, 
   material: string
 ): Promise<AiPresetResponse> => {
-  // 1. Verificação inicial da chave
+  // A chave deve vir obrigatoriamente do environment configurado no build/Vercel
   const apiKey = process.env.API_KEY;
   
   if (!apiKey || apiKey === 'undefined' || apiKey === '') {
-    console.warn("API Key ausente. Usando fallback.");
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve(getMockData("Chave de API não configurada"));
-      }, 1000);
-    });
+    console.error("ERRO: API_KEY não encontrada nas variáveis de ambiente do Vercel.");
+    return getMockData("Chave de API não configurada no servidor");
   }
   
   try {
-    const ai = new GoogleGenAI({ apiKey });
-    const modelId = 'gemini-2.5-flash';
+    // Inicialização seguindo as diretrizes Senior: nomeado, nova instância por chamada
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    
+    // Usando Gemini 3 Pro para tarefas complexas de lógica e STEM (parâmetros de usinagem)
+    // NOTA: O modelo 'gemini-3-pro-preview' requer obrigatoriamente um thinkingBudget > 0.
+    const modelId = 'gemini-3-pro-preview';
 
     const prompt = `
-      Atue como um especialista em usinagem CNC (Engenheiro Mecânico).
-      Calcule os parâmetros de corte ideais (Conservative a Moderado) para a seguinte configuração:
+      Atue como um especialista sênior em usinagem CNC.
+      Calcule parâmetros de corte precisos e seguros para a seguinte ferramenta:
 
-      FERRAMENTA:
+      ESPECIFICAÇÕES DA FRESA:
       - Nome: ${bit.name}
-      - Tipo: ${bit.type}
-      - Diâmetro de Corte: ${bit.diameter}
-      - Material da Fresa: ${bit.material}
-      - Número de Facas/Cortes: ${bit.specs?.geometry || '2'}
+      - Diâmetro: ${bit.diameter}
+      - Material: ${bit.material}
+      - Geometria: ${bit.specs?.geometry || '2 cortes'}
       
-      MATERIAL A SER USINADO:
+      MATERIAL ALVO:
       - ${material}
 
-      Retorne os parâmetros otimizados para uma máquina CNC Router de porte médio (hobby/semi-profissional).
+      Considere uma CNC Router de precisão média. Forneça RPM, Avanço (mm/min), Mergulho (mm/min) e Passo Vertical (mm).
     `;
 
     const responseSchema: Schema = {
       type: Type.OBJECT,
       properties: {
-        rpm: { type: Type.INTEGER, description: "Rotação do Spindle (RPM)" },
-        feedRate: { type: Type.INTEGER, description: "Velocidade de Avanço (mm/min)" },
-        plungeRate: { type: Type.INTEGER, description: "Velocidade de Mergulho (mm/min)" },
-        stepDown: { type: Type.NUMBER, description: "Passo Vertical / Profundidade por passe (mm)" },
-        explanation: { type: Type.STRING, description: "Breve explicação técnica (max 20 palavras)" },
-        warning: { type: Type.STRING, description: "Aviso de segurança curto se necessário", nullable: true }
+        rpm: { type: Type.INTEGER, description: "Rotação ideal" },
+        feedRate: { type: Type.INTEGER, description: "Velocidade de avanço lateral em mm/min" },
+        plungeRate: { type: Type.INTEGER, description: "Velocidade de mergulho vertical em mm/min" },
+        stepDown: { type: Type.NUMBER, description: "Profundidade máxima por passe em mm" },
+        explanation: { type: Type.STRING, description: "Breve justificativa técnica" },
+        warning: { type: Type.STRING, description: "Aviso de segurança importante", nullable: true }
       },
       required: ["rpm", "feedRate", "plungeRate", "stepDown", "explanation"]
     };
 
-    const result = await ai.models.generateContent({
+    const response = await ai.models.generateContent({
       model: modelId,
       contents: prompt,
       config: {
         responseMimeType: "application/json",
         responseSchema: responseSchema,
-        temperature: 0.2,
+        temperature: 1, // Geralmente utiliza-se temperature 1 com modelos de 'thinking' para melhor exploração de caminhos lógicos
+        thinkingConfig: { thinkingBudget: 4096 } // Definindo um orçamento positivo para evitar erro INVALID_ARGUMENT
       }
     });
 
-    if (result.text) {
-      return JSON.parse(result.text) as AiPresetResponse;
+    if (response.text) {
+      return JSON.parse(response.text.trim()) as AiPresetResponse;
     }
     
-    throw new Error("Resposta vazia da IA");
+    throw new Error("Resposta da IA retornou sem conteúdo de texto.");
 
-  } catch (error) {
-    // 2. Fallback para erros de execução (Chave inválida, Cota excedida, Erro de rede)
-    console.error("Erro na API Gemini (usando fallback):", error);
-    return getMockData("Erro na conexão com a IA (Verifique a Chave API)");
+  } catch (error: any) {
+    console.error("Falha na chamada da API Gemini:", error);
+    
+    // Tratamento específico para erro de entidade não encontrada (comum em chaves novas ou projetos mal vinculados)
+    if (error?.message?.includes("Requested entity was not found")) {
+        return getMockData("Erro de permissão na API (Verifique o projeto no Google Cloud)");
+    }
+
+    // Retorna mensagem de erro detalhada para facilitar o debug pelo usuário
+    return getMockData(`Erro técnico: ${error?.message || 'Falha na conexão'}`);
   }
 };
