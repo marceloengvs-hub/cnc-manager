@@ -52,6 +52,20 @@ const Profile: React.FC = () => {
             </button>
           )}
 
+          <a 
+            href="https://github.com/marceloengvs-hub/cnc-manager" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="w-full flex items-center gap-4 p-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors text-left"
+          >
+            <span className="material-symbols-outlined text-primary">github</span>
+            <div className="flex-1">
+              <p className="text-sm font-bold text-slate-900 dark:text-white">Salvar no GitHub</p>
+              <p className="text-xs text-slate-500">marceloengvs-hub/cnc-manager</p>
+            </div>
+            <span className="material-symbols-outlined text-slate-400">open_in_new</span>
+          </a>
+
           <button className="w-full flex items-center gap-4 p-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors text-left">
             <span className="material-symbols-outlined text-slate-500">help</span>
             <div className="flex-1">
@@ -72,7 +86,7 @@ const Profile: React.FC = () => {
       </div>
       
       <div className="mt-auto pb-24 text-center">
-        <p className="text-xs text-slate-400">CNC Manager v1.0.3</p>
+        <p className="text-xs text-slate-400">CNC Manager v1.0.4</p>
       </div>
     </div>
   );
