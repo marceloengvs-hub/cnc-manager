@@ -1,0 +1,7 @@
+{
+  "name": "CNC__Fresas",
+  "description": "A comprehensive dashboard for managing CNC milling bits, stock, and parameters.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
