@@ -69,36 +69,31 @@ const App: React.FC = () => {
       try {
         const { data, error } = await supabase.auth.getSession();
         
-        if (error) {
-          console.warn("Session initialization error:", error.message);
-          await supabase.auth.signOut();
-          if (mounted) setSession(null);
-        } else {
-          if (mounted) setSession(data.session);
+        if (mounted) {
+          if (error) {
+            console.warn("Session initialization error:", error.message);
+            setSession(null);
+          } else {
+            setSession(data.session);
+          }
+          setLoading(false);
         }
       } catch (err) {
         console.error("Unexpected auth error:", err);
-        if (mounted) setSession(null);
-      } finally {
-        if (mounted) setLoading(false);
+        if (mounted) {
+          setSession(null);
+          setLoading(false);
+        }
       }
     };
 
     initializeSession();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      // Cast event to string to avoid TS2367 error if types are missing specific enums
-      const eventType = event as string;
-
-      if (eventType === 'SIGNED_OUT' || eventType === 'USER_DELETED') {
-        setSession(null);
-      } else if (eventType === 'TOKEN_REFRESH_REVOKED') {
-         await supabase.auth.signOut();
-         setSession(null);
-      } else {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (mounted) {
         setSession(session);
+        setLoading(false);
       }
-      setLoading(false);
     });
 
     return () => {

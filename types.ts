@@ -8,7 +8,8 @@ export interface MillingBit {
   stock: number;
   minStock: number;
   material: string; // e.g., "Metal Duro"
-  colletSize: string; // e.g., "6mm", "3.175mm"
+  colletSize: string; // e.g., "6mm", "3.175mm" (This maps to diam_haste)
+  recommendedCollet?: string; // Maps to pinca_recomendada
   hasCollet?: boolean;
   specs?: {
     rpm: number;

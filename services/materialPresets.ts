@@ -11,7 +11,8 @@ export const MATERIALS_LIST = [
   'PVC Expandido',
   'Alumínio',
   'Latão',
-  'Cobre'
+  'Cobre',
+  'Outro material (IA)'
 ];
 
 export interface CNCPreset {

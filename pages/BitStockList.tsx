@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useData } from '../contexts/DataContext';
@@ -11,8 +12,8 @@ const BitStockList: React.FC = () => {
   // Helper para extrair diâmetro da haste baseado na pinça
   const getShankDiameter = (bit: MillingBit) => {
     if (!bit.hasCollet || bit.colletSize === 'Sem pinça') return '-';
-    // Remove "ER20" e espaços extras para tentar isolar o tamanho
-    return bit.colletSize.replace(/ER\d+\s*/i, '').trim();
+    // Garantir que colletSize seja string antes de usar .replace()
+    return String(bit.colletSize).replace(/ER\d+\s*/i, '').trim();
   };
 
   const filteredBits = bits.filter(bit => 
@@ -72,7 +73,7 @@ const BitStockList: React.FC = () => {
                 return (
                   <tr 
                     key={bit.id} 
-                    onClick={() => navigate(`/edit-stock/${bit.id}`)}
+                    onClick={() => navigate(`/details/${bit.id}`)}
                     className={`
                       cursor-pointer transition-colors hover:bg-slate-50 dark:hover:bg-white/5
                       ${isCritical ? 'bg-red-50 dark:bg-red-900/10' : ''}

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useData } from '../contexts/DataContext';
@@ -19,18 +20,15 @@ const ColletStock: React.FC = () => {
   };
 
   const handleUpdateStock = async (id: string, newStock: number) => {
-     if (!isAdmin) return; // double check
+     if (!isAdmin) return; 
 
-     // Optimistic update
      setLocalUpdates(prev => ({ ...prev, [id]: newStock }));
      
      try {
        await updateColletStock(id, newStock);
-       // Silent refresh in background to sync
        refreshData(); 
      } catch (err) {
          console.error("Failed to update stock", err);
-         // Revert on failure by removing from localUpdates (could be improved)
          const { [id]: removed, ...rest } = localUpdates;
          setLocalUpdates(rest);
          alert("Falha ao atualizar estoque.");
@@ -62,7 +60,7 @@ const ColletStock: React.FC = () => {
     return true;
   });
 
-  const total = collets.reduce((acc, c) => acc + getStock(c), 0);
+  const total = filteredCollets.reduce((acc, c) => acc + getStock(c), 0);
 
   if (loading) {
       return <div className="p-10 text-center text-slate-500">Carregando estoque...</div>;
@@ -103,7 +101,7 @@ const ColletStock: React.FC = () => {
               <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">Total</p>
             </div>
             <p className="text-slate-900 dark:text-white text-2xl font-bold leading-tight">{total}</p>
-            <p className="text-xs text-slate-400">Unidades totais</p>
+            <p className="text-xs text-slate-400">Unidades totais compatíveis</p>
           </div>
         </section>
 
@@ -137,7 +135,6 @@ const ColletStock: React.FC = () => {
           {filteredCollets.map(item => {
             const count = getStock(item);
             const isCritical = count === 0;
-            const isLow = count <= item.minStock && count > 0;
 
             return (
               <div 
@@ -149,7 +146,6 @@ const ColletStock: React.FC = () => {
               >
                 {isCritical && <div className="absolute inset-0 bg-alert/5 pointer-events-none"></div>}
 
-                {/* Thumbnail Logic */}
                 {item.imageUrl ? (
                   <div 
                     onClick={(e) => {
@@ -167,36 +163,26 @@ const ColletStock: React.FC = () => {
                   </div>
                 )}
 
-                <div className="flex flex-1 flex-col justify-center min-w-0 z-10">
+                <div className="flex-1 min-w-0 z-10">
                   <div className="flex items-center gap-2">
-                    <p className={`text-slate-900 dark:text-white text-base font-semibold truncate ${isCritical ? 'opacity-80' : ''}`}>{item.name}</p>
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${isLow ? 'bg-primary/10 text-primary' : 'bg-gray-200 dark:bg-gray-700 text-slate-600 dark:text-gray-300'}`}>{item.size}</span>
+                    <p className={`text-slate-900 dark:text-white text-base font-semibold truncate`}>{item.name}</p>
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-primary/10 text-primary">{item.size}</span>
                   </div>
-                  {isCritical ? (
-                    <p className="text-alert text-xs font-bold mt-0.5 uppercase tracking-wide">Esgotado</p>
-                  ) : (
-                    <p className="text-slate-500 dark:text-slate-400 text-sm mt-0.5">{item.description}</p>
-                  )}
+                  <p className="text-slate-500 dark:text-slate-400 text-sm mt-0.5">{item.description}</p>
                 </div>
 
                 <div className="flex items-center gap-3 z-10">
                   <button 
                     onClick={() => handleDecrement(item.id, count)}
-                    className={`size-8 flex items-center justify-center rounded-full transition-colors
-                      ${(isCritical || !isAdmin) ? 'bg-gray-100 dark:bg-[#283039] text-slate-400 dark:text-slate-500 cursor-not-allowed opacity-50' : 'bg-gray-100 dark:bg-[#283039] text-slate-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'}
-                    `}
-                    disabled={isCritical || !isAdmin}
+                    className="size-8 flex items-center justify-center rounded-full bg-gray-100 dark:bg-[#283039] text-slate-900 dark:text-white disabled:opacity-30"
+                    disabled={!isAdmin || count === 0}
                   >
                     <span className="material-symbols-outlined text-base">remove</span>
                   </button>
-                  <span className={`w-4 text-center font-bold ${isCritical ? 'text-alert' : 'text-slate-900 dark:text-white'}`}>{count}</span>
+                  <span className="w-4 text-center font-bold text-slate-900 dark:text-white">{count}</span>
                   <button 
                     onClick={() => handleIncrement(item.id, count)}
-                    className={`size-8 flex items-center justify-center rounded-full transition-colors shadow-lg 
-                       ${(isCritical && isAdmin) ? 'bg-alert text-white hover:bg-red-600 shadow-alert/25' : 'bg-gray-100 dark:bg-[#283039] text-slate-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'}
-                       ${(isLow && !isCritical && isAdmin) ? 'bg-primary text-white hover:bg-blue-600 shadow-primary/20' : ''}
-                       ${!isAdmin ? 'opacity-50 cursor-not-allowed shadow-none' : ''}
-                    `}
+                    className="size-8 flex items-center justify-center rounded-full bg-primary text-white shadow-lg disabled:opacity-30"
                     disabled={!isAdmin}
                   >
                     <span className="material-symbols-outlined text-base">add</span>
@@ -208,7 +194,6 @@ const ColletStock: React.FC = () => {
         </section>
       </div>
 
-      {/* Lightbox / Zoom Modal */}
       {selectedImage && (
         <ImageViewer 
            src={selectedImage}

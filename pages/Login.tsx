@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { supabase } from '../services/supabaseClient';
 import { useNavigate } from 'react-router-dom';
@@ -6,6 +7,7 @@ const Login: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(true);
   const [isSignUp, setIsSignUp] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -62,7 +64,7 @@ const Login: React.FC = () => {
             )}
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-500">E-mail</label>
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-500">E-MAIL</label>
               <input
                 type="email"
                 value={email}
@@ -74,7 +76,7 @@ const Login: React.FC = () => {
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Senha</label>
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-500">SENHA</label>
               <input
                 type="password"
                 value={password}
@@ -83,6 +85,20 @@ const Login: React.FC = () => {
                 placeholder="••••••••"
                 className="w-full rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 h-11 px-3 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all"
               />
+            </div>
+
+            {/* Remember Me Checkbox */}
+            <div className="flex items-center gap-2 mt-1">
+              <input
+                id="rememberMe"
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="w-4 h-4 rounded border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-primary focus:ring-primary focus:ring-offset-0 dark:focus:ring-offset-background-dark cursor-pointer"
+              />
+              <label htmlFor="rememberMe" className="text-sm text-slate-500 dark:text-slate-400 font-medium cursor-pointer select-none">
+                Mantenha conectado
+              </label>
             </div>
 
             <button
