@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useData } from '../contexts/DataContext';
@@ -85,7 +86,7 @@ const AdminManagement: React.FC = () => {
              </div>
              <div>
                 <h3 className="text-base font-bold text-slate-900 dark:text-white">Adicionar Administrador</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Permite acesso total ao sistema</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Ao adicionar o endereço do usuário, o mesmo deve ter privilégios de administrador.</p>
              </div>
           </div>
           

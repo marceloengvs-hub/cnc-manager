@@ -3,6 +3,7 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useData } from '../contexts/DataContext';
 import { checkColletCompatibility } from '../services/mockData';
+import { MillingBit } from '../types';
 
 const SkeletonCard = () => (
   <div className="flex flex-col flex-1 rounded-xl p-4 bg-surface-light dark:bg-surface-dark shadow-sm border border-slate-100 dark:border-slate-800 animate-pulse">
@@ -53,6 +54,29 @@ const Dashboard: React.FC = () => {
     } finally {
       setSeeding(false);
     }
+  };
+
+  const handleRequestRestock = (bit: MillingBit) => {
+    const recipient = "marcelo.sousa@ufg.br";
+    const subject = `Solicitação de Reposição - ${bit.name}`;
+    
+    // Monta o corpo do e-mail com as especificações técnicas
+    const body = `Olá,\n\nSolicito a reposição do seguinte item que atingiu o nível crítico de estoque:\n\n` +
+      `ESPECIFICAÇÕES DA FRESA:\n` +
+      `-----------------------------------\n` +
+      `Nome: ${bit.name}\n` +
+      `Tipo: ${bit.type}\n` +
+      `Diâmetro de Corte: ${bit.diameter}\n` +
+      `Material: ${bit.material}\n` +
+      `Diâmetro da Haste: ${bit.colletSize}mm\n` +
+      `Estoque Atual: ${bit.stock} unidade(s)\n` +
+      `Estoque Mínimo: ${bit.minStock} unidade(s)\n` +
+      `-----------------------------------\n\n` +
+      `Link da Imagem: ${bit.imageUrl || 'N/A'}\n\n` +
+      `Atenciosamente,\nCNC Manager`;
+    
+    // Abre o cliente de email padrão
+    window.location.href = `mailto:${recipient}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   };
 
   const stats = useMemo(() => {
@@ -182,7 +206,13 @@ const Dashboard: React.FC = () => {
                           <span className="material-symbols-outlined text-[16px]">warning</span>
                           <p className="text-sm font-semibold">Estoque Crítico ({bit.stock} un)</p>
                         </div>
-                        <button onClick={(e) => { e.stopPropagation(); navigate('/list'); }} className="mt-2 text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 py-1.5 px-3 rounded w-fit transition-colors">
+                        <button 
+                          onClick={(e) => { 
+                            e.stopPropagation(); 
+                            handleRequestRestock(bit);
+                          }} 
+                          className="mt-2 text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 py-1.5 px-3 rounded w-fit transition-colors"
+                        >
                           Solicitar Reposição
                         </button>
                       </div>

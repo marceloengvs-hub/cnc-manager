@@ -4,10 +4,13 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { fetchBitById, updateBit } from '../services/api';
 import { MillingBit } from '../types';
 import { getRequiredColletSize } from '../services/mockData';
+import { useData } from '../contexts/DataContext';
 
 const EditMillingBit: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { refreshData } = useData();
+  
   const [bit, setBit] = useState<MillingBit | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -130,6 +133,7 @@ const EditMillingBit: React.FC = () => {
 
     try {
         await updateBit(id, updates);
+        await refreshData();
         navigate(-1);
     } catch (error: any) {
         console.error("Falha ao atualizar:", error);
@@ -175,7 +179,7 @@ const EditMillingBit: React.FC = () => {
           
           <div className="flex flex-col gap-5">
             <label className="flex flex-col flex-1">
-              <p className="text-[#111418] dark:text-white text-sm font-bold leading-normal pb-2">Especificação (Nome/Código)</p>
+              <p className="text-[#111418] dark:text-white text-sm font-bold leading-normal pb-2">Especificação (nome/código)</p>
               <input 
                 value={name} 
                 onChange={(e) => setName(e.target.value)} 
@@ -184,38 +188,40 @@ const EditMillingBit: React.FC = () => {
               />
             </label>
 
-            <div className="flex gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <label className="flex flex-col flex-1 min-w-0">
-                <p className="text-[#111418] dark:text-white text-sm font-bold leading-normal pb-2 truncate">Diâmetro de Corte</p>
+                <p className="text-[#111418] dark:text-white text-sm font-bold leading-normal pb-2 truncate">Diâmetro de corte</p>
                 <div className="relative">
                   <input 
-                    type="number" 
+                    type="text" 
+                    inputMode="decimal"
                     value={cuttingDia} 
-                    onChange={(e) => setCuttingDia(e.target.value)} 
+                    onChange={(e) => setCuttingDia(e.target.value.replace(',', '.'))} 
                     className="w-full rounded-xl text-[#111418] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#dce0e5] dark:border-[#3b4754] bg-white dark:bg-surface-dark h-14 placeholder:text-[#9dabb9] px-4 text-base font-normal shadow-sm" 
                     placeholder="3" 
                   />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9dabb9] text-sm font-medium pointer-events-none uppercase tracking-widest">mm</span>
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9dabb9] text-sm font-medium pointer-events-none">mm</span>
                 </div>
               </label>
               
               <label className="flex flex-col flex-1 min-w-0">
-                <p className="text-[#111418] dark:text-white text-sm font-bold leading-normal pb-2 truncate">Diâmetro da Haste (diam_haste)</p>
+                <p className="text-[#111418] dark:text-white text-sm font-bold leading-normal pb-2 truncate">Diâmetro da haste</p>
                 <div className="relative group">
                   <input 
-                    type="number" 
+                    type="text" 
+                    inputMode="decimal"
                     value={shankDia} 
-                    onChange={(e) => setShankDia(e.target.value)} 
+                    onChange={(e) => setShankDia(e.target.value.replace(',', '.'))} 
                     className="w-full rounded-xl text-[#111418] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#dce0e5] dark:border-[#3b4754] bg-white dark:bg-surface-dark h-14 placeholder:text-[#9dabb9] px-4 text-base font-normal shadow-sm ring-1 ring-primary/30" 
                     placeholder="3" 
                   />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9dabb9] text-sm font-medium pointer-events-none uppercase tracking-widest">mm</span>
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9dabb9] text-sm font-medium pointer-events-none">mm</span>
                 </div>
               </label>
             </div>
 
              <label className="flex flex-col flex-1">
-              <p className="text-[#111418] dark:text-white text-sm font-bold leading-normal pb-2">Pinça Recomendada (Calculada)</p>
+              <p className="text-[#111418] dark:text-white text-sm font-bold leading-normal pb-2">Pinça recomendada (calculada)</p>
               <div className={`w-full rounded-xl flex items-center px-4 h-14 text-base font-bold shadow-inner transition-colors
                   ${calculatedColletLabel.toLowerCase().includes('indisponível') 
                     ? 'bg-red-950/20 border border-red-500/30 text-red-500' 
@@ -224,6 +230,60 @@ const EditMillingBit: React.FC = () => {
                 {calculatedColletLabel}
               </div>
             </label>
+
+            {/* Novos campos adicionados conforme solicitação */}
+            <div className="grid grid-cols-2 gap-4">
+              <label className="flex flex-col flex-1 min-w-0">
+                <p className="text-[#111418] dark:text-white text-sm font-bold leading-normal pb-2 truncate">Comprimento total</p>
+                <div className="relative">
+                  <input 
+                    type="text" 
+                    inputMode="decimal"
+                    value={totalLength} 
+                    onChange={(e) => setTotalLength(e.target.value.replace(',', '.'))} 
+                    className="w-full rounded-xl text-[#111418] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#dce0e5] dark:border-[#3b4754] bg-white dark:bg-surface-dark h-14 placeholder:text-[#9dabb9] px-4 text-base font-normal shadow-sm" 
+                    placeholder="Ex: 50" 
+                  />
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9dabb9] text-sm font-medium pointer-events-none">mm</span>
+                </div>
+              </label>
+              
+              <label className="flex flex-col flex-1 min-w-0">
+                <p className="text-[#111418] dark:text-white text-sm font-bold leading-normal pb-2 truncate">Dureza (HRC)</p>
+                <input 
+                  type="text" 
+                  value={hardness} 
+                  onChange={(e) => setHardness(e.target.value)} 
+                  className="w-full rounded-xl text-[#111418] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#dce0e5] dark:border-[#3b4754] bg-white dark:bg-surface-dark h-14 placeholder:text-[#9dabb9] px-4 text-base font-normal shadow-sm" 
+                  placeholder="Ex: 55" 
+                />
+              </label>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <label className="flex flex-col flex-1 min-w-0">
+                <p className="text-[#111418] dark:text-white text-sm font-bold leading-normal pb-2 truncate">Geometria</p>
+                <input 
+                  type="text" 
+                  value={geometry} 
+                  onChange={(e) => setGeometry(e.target.value)} 
+                  className="w-full rounded-xl text-[#111418] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#dce0e5] dark:border-[#3b4754] bg-white dark:bg-surface-dark h-14 placeholder:text-[#9dabb9] px-4 text-base font-normal shadow-sm" 
+                  placeholder="Ex: 2 Cortes" 
+                />
+              </label>
+              
+              <label className="flex flex-col flex-1 min-w-0">
+                <p className="text-[#111418] dark:text-white text-sm font-bold leading-normal pb-2 truncate">Material da fresa</p>
+                <input 
+                  type="text" 
+                  value={material} 
+                  onChange={(e) => setMaterial(e.target.value)} 
+                  className="w-full rounded-xl text-[#111418] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#dce0e5] dark:border-[#3b4754] bg-white dark:bg-surface-dark h-14 placeholder:text-[#9dabb9] px-4 text-base font-normal shadow-sm" 
+                  placeholder="Ex: Metal Duro" 
+                />
+              </label>
+            </div>
+
           </div>
         </div>
       </div>

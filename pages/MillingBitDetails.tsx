@@ -117,7 +117,7 @@ const MillingBitDetails: React.FC = () => {
       {/* Header */}
       <div className="sticky top-0 z-50 flex items-center bg-background-dark/80 backdrop-blur-md p-4 justify-between border-b border-slate-800/50">
         <button 
-          onClick={() => navigate('/stock')} 
+          onClick={() => navigate('/bit-stock')} 
           className="flex items-center justify-center w-10 h-10 rounded-lg bg-surface-dark border border-slate-800 text-white hover:bg-slate-800 transition-colors"
         >
           <span className="material-symbols-outlined">arrow_back</span>

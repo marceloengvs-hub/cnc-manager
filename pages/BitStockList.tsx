@@ -91,7 +91,8 @@ const BitStockList: React.FC = () => {
                       </div>
                     </td>
                     <td className="p-3 text-sm text-slate-600 dark:text-slate-300">
-                      {bit.type}
+                      {/* Prioriza a geometria (specs) em vez do tipo genérico */}
+                      {bit.specs?.geometry || bit.type}
                     </td>
                     <td className="p-3 text-sm text-slate-600 dark:text-slate-300 text-center">
                       {getShankDiameter(bit)}

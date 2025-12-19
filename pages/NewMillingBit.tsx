@@ -123,7 +123,7 @@ const NewMillingBit: React.FC = () => {
           
           <div className="flex flex-col gap-5">
             <label className="flex flex-col flex-1">
-              <p className="text-[#111418] dark:text-white text-sm font-bold leading-normal pb-2">Especificação (Nome/Código)</p>
+              <p className="text-[#111418] dark:text-white text-sm font-bold leading-normal pb-2">Especificação (nome/código)</p>
               <input 
                 value={name} 
                 onChange={e => setName(e.target.value)} 
@@ -134,12 +134,13 @@ const NewMillingBit: React.FC = () => {
 
             <div className="flex gap-4">
               <label className="flex flex-col flex-1 min-w-0">
-                <p className="text-[#111418] dark:text-white text-sm font-bold leading-normal pb-2 truncate">Diâmetro de Corte</p>
+                <p className="text-[#111418] dark:text-white text-sm font-bold leading-normal pb-2 truncate">Diâmetro de corte</p>
                 <div className="relative">
                   <input 
-                    type="number" 
+                    type="text" 
+                    inputMode="decimal"
                     value={cuttingDia} 
-                    onChange={(e) => setCuttingDia(e.target.value)} 
+                    onChange={(e) => setCuttingDia(e.target.value.replace(',', '.'))} 
                     className="w-full rounded-xl text-[#111418] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#dce0e5] dark:border-[#3b4754] bg-white dark:bg-surface-dark h-14 placeholder:text-[#9dabb9] px-4 text-base font-normal shadow-sm" 
                     placeholder="3" 
                   />
@@ -148,12 +149,13 @@ const NewMillingBit: React.FC = () => {
               </label>
               
               <label className="flex flex-col flex-1 min-w-0">
-                <p className="text-[#111418] dark:text-white text-sm font-bold leading-normal pb-2 truncate">Diâmetro da Haste (diam_haste)</p>
+                <p className="text-[#111418] dark:text-white text-sm font-bold leading-normal pb-2 truncate">Diâmetro da haste</p>
                 <div className="relative">
                   <input 
-                    type="number" 
+                    type="text" 
+                    inputMode="decimal"
                     value={shankDia} 
-                    onChange={(e) => setShankDia(e.target.value)} 
+                    onChange={(e) => setShankDia(e.target.value.replace(',', '.'))} 
                     className="w-full rounded-xl text-[#111418] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#dce0e5] dark:border-[#3b4754] bg-white dark:bg-surface-dark h-14 placeholder:text-[#9dabb9] px-4 text-base font-normal shadow-sm" 
                     placeholder="3" 
                   />
@@ -163,7 +165,7 @@ const NewMillingBit: React.FC = () => {
             </div>
 
              <label className="flex flex-col flex-1">
-              <p className="text-[#111418] dark:text-white text-sm font-bold leading-normal pb-2">Pinça Recomendada (Calculada)</p>
+              <p className="text-[#111418] dark:text-white text-sm font-bold leading-normal pb-2">Pinça recomendada (calculada)</p>
               <div className={`w-full rounded-xl flex items-center px-4 h-14 text-base font-bold shadow-inner
                   ${calculatedColletLabel.toLowerCase().includes('indisponível') 
                     ? 'bg-red-950/20 border border-red-500/30 text-red-500' 
